@@ -11,14 +11,14 @@ public class Login extends JFrame implements ActionListener {
     JTextField cardTextField;
     JPasswordField pinTextField;
 
+    int loginAttempts = 0; // Count wrong login attempts
+
     Login() {
 
         setTitle("AUTOMATED TELLER MACHINE");
         setLayout(null);
 
         // ===== IMAGE =====
-        // Put image inside: src/images/logo.jpg
-
         ImageIcon i1 = new ImageIcon("src/images/logo.jpg");
 
         Image i2 = i1.getImage().getScaledInstance(
@@ -97,58 +97,81 @@ public class Login extends JFrame implements ActionListener {
     // ===== BUTTON ACTIONS =====
     public void actionPerformed(ActionEvent ae) {
 
-    if (ae.getSource() == clear) {
+        if (ae.getSource() == clear) {
 
-        cardTextField.setText("");
-        pinTextField.setText("");
+            cardTextField.setText("");
+            pinTextField.setText("");
 
-    } else if (ae.getSource() == login) {
+        } else if (ae.getSource() == login) {
 
-        try {
+            try {
 
-            Conn conn = new Conn();
+                Conn conn = new Conn();
 
-            String cardnumber = cardTextField.getText();
-            String pinnumber = String.valueOf(pinTextField.getPassword());
+                String cardnumber = cardTextField.getText();
+                String pinnumber = String.valueOf(pinTextField.getPassword());
 
-            String query = "SELECT * FROM login WHERE cardnumber = ? AND pin = ?";
+                String query = "SELECT * FROM login WHERE cardnumber = ? AND pin = ?";
 
-            PreparedStatement ps = conn.c.prepareStatement(query);
+                PreparedStatement ps = conn.c.prepareStatement(query);
 
-            ps.setString(1, cardnumber);
-            ps.setString(2, pinnumber);
+                ps.setString(1, cardnumber);
+                ps.setString(2, pinnumber);
 
-            ResultSet rs = ps.executeQuery();
+                ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
+                if (rs.next()) {
 
-                setVisible(false);
-                new Transactions(pinnumber).setVisible(true);
+                    loginAttempts = 0; // reset on success
 
-            } else {
+                    setVisible(false);
+                    new Transactions(pinnumber).setVisible(true);
 
-                JOptionPane.showMessageDialog(null,
-                        "Incorrect Card Number or Pin");
+                } else {
+
+                    loginAttempts++;
+
+                    if (loginAttempts >= 3) {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "ACCOUNT BLOCKED!\nYou entered the wrong PIN 3 times."
+                        );
+
+                        login.setEnabled(false);
+                        cardTextField.setEnabled(false);
+                        pinTextField.setEnabled(false);
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Incorrect Card Number or PIN\nAttempts Left: "
+                                        + (3 - loginAttempts)
+                        );
+                    }
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
+        } else if (ae.getSource() == signup) {
 
-            e.printStackTrace();
+            setVisible(false);
+            new SignupOne().setVisible(true);
         }
-
-    } else if (ae.getSource() == signup) {
-
-        setVisible(false);
-        new SignupOne().setVisible(true);
     }
-}
 
-public static void main(String[] args) {
+    public static void main(String[] args) {
 
-    new Login();
-}
+        new Login();
+    }
 
     void Visible(boolean b) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException(
+                "Not supported yet."
+        );
     }
 }
