@@ -1,4 +1,5 @@
 ATM and Account management system
+
 ATM and Account management system is a desktop application simulating Automated Teller Machine (ATM) workflows. It is built as a Java Swing application backed by MySQL for data storage.
 
 The platform includes forms to register accounts, generate card credentials, authenticate logins, and handle transactions like deposits, withdrawals, PIN updates, and statements.
